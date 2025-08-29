@@ -1,9 +1,9 @@
-from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request, status
 from fastapi.responses import Response
 
 from app.config.main import settings
 from app.models.user import User
-from app.schemas.user import SUserAuth, SUserRegister
+from app.schemas.user import SLoginAnswer, SUserAuth, SUserRegister, SUserUpdate
 from app.services.users import UserService
 from app.utils.dependencies import get_current_user
 
@@ -11,16 +11,33 @@ router = APIRouter(prefix="/auth", tags=["Auth"])
 
 
 @router.post("/register/", status_code=status.HTTP_201_CREATED, summary="Регистрация пользователя")
-async def register_user(user_data: SUserRegister, service: UserService = Depends(UserService)):
-    return await service.register(user_data)
+async def register_user(
+    user_data: SUserRegister, background_tasks: BackgroundTasks, service: UserService = Depends(UserService)
+):
+    return await service.register(user_data, background_tasks)
 
 
-@router.post("/login/", summary="Аутентификация пользователя")
+@router.get("/confirm", summary="Подтверждение email пользователя", include_in_schema=False)
+async def confirm_email(token: str, service: UserService = Depends(UserService)):
+    # user_id = await service.redis.get(f"confirm:{token}")
+    # if not user_id:
+    #     raise HTTPException(status_code=400, detail="Неверный или просроченный токен")
+    # user = await service.users_repo.find_one_or_none(id=user_id)
+    # if not user:
+    #     raise HTTPException(status_code=404, detail="Пользователь не найден")
+    # await service.update_user(user.id, SUserUpdate(is_active=True))
+    # await service.redis.delete(f"confirm:{token}")
+    # return {"message": "Email подтвержден! Теперь вы можете войти."}
+    return await service.confirm_email(token)
+
+
+@router.post("/login/", summary="Аутентификация пользователя", response_model=SLoginAnswer)
 async def auth_user(user_data: SUserAuth, response: Response, service: UserService = Depends(UserService)):
+    """Введите email и пароль, указанные при регистрации."""
     return await service.authenticate_user(user_data, response=response)
 
 
-@router.post("/refresh/", summary="Обновление access и refresh токенов")
+@router.post("/refresh/", summary="Обновление access и refresh токенов", response_model=SLoginAnswer)
 async def refresh_tokens(request: Request, response: Response, service: UserService = Depends(UserService)):
     access_token = request.cookies.get(settings.ACCESS_TOKEN_NAME)
     if not access_token:

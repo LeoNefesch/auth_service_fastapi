@@ -13,10 +13,21 @@ class Settings(BaseSettings):
     REDIS_HOST: str = "redis"
     REDIS_PORT: int = 6379
     REDIS_DB: int = 0
+
+    SMTP_HOST: str = "smtp.gmail.com"
+    SMTP_PORT: int = 587
+    SMTP_USER: str = "example@gmail.com"
+    SMTP_PASSWORD: str
+
+    DOMAIN: str
+    REDIRECT_URL: str
+
     SECRET_KEY: str = "secret"
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     ACCESS_TOKEN_NAME: str = "access_token"
+    REFRESH_TOKEN_EXPIRE_SECONDS: int = 14 * 24 * 3600
+    CONFIRM_TOKEN_EXPIRE_SECONDS: int = 3600
 
     @property
     def DATABASE_URL(self):

@@ -15,3 +15,7 @@ class AbstractRepository(ABC):
     @abstractmethod
     async def get_all(self, **filter_by) -> list[model]:
         """Вывести список всех сущностей."""
+
+    @abstractmethod
+    async def update(self, entity: model, updates: dict) -> model:
+        """Обновить сущность."""
