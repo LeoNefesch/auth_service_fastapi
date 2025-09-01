@@ -19,15 +19,6 @@ async def register_user(
 
 @router.get("/confirm", summary="Подтверждение email пользователя", include_in_schema=False)
 async def confirm_email(token: str, service: UserService = Depends(UserService)):
-    # user_id = await service.redis.get(f"confirm:{token}")
-    # if not user_id:
-    #     raise HTTPException(status_code=400, detail="Неверный или просроченный токен")
-    # user = await service.users_repo.find_one_or_none(id=user_id)
-    # if not user:
-    #     raise HTTPException(status_code=404, detail="Пользователь не найден")
-    # await service.update_user(user.id, SUserUpdate(is_active=True))
-    # await service.redis.delete(f"confirm:{token}")
-    # return {"message": "Email подтвержден! Теперь вы можете войти."}
     return await service.confirm_email(token)
 
 
